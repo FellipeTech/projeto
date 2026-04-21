@@ -6,8 +6,10 @@ import urllib.parse
 # =========================
 st.set_page_config(page_title="Pagamento", layout="centered")
 
-numero = "5573999946196"  # seu WhatsApp
-pix_chave = "09749282590"
+numero = "5573999946196"  # WhatsApp
+
+# Pix copia e cola (EMV)
+pix_copia_cola = "00020101021126330014br.gov.bcb.pix0111097492825905204000053039865802BR5920FELLIPE F BITENCOURT6007ITABUNA62070503***6304F001"
 
 # =========================
 # FUNÇÃO WHATSAPP
@@ -69,12 +71,15 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # =========================
-# PAGAMENTO PIX
+# PAGAMENTO PIX (CÓPIA E COLA)
 # =========================
 st.header("💸 Pagamento via Pix")
 
-st.write("Use a chave abaixo para realizar o pagamento:")
-st.code(pix_chave)
+st.write("Copie o código abaixo e pague no seu banco:")
+
+st.code(pix_copia_cola)
+
+st.caption("Após o pagamento, clique em confirmar abaixo 👇")
 
 # =========================
 # PAGAMENTO CARTÃO (SIMULADO)
