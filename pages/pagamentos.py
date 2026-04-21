@@ -2,9 +2,13 @@ import streamlit as st
 import qrcode
 from io import BytesIO
 import urllib.parse
-query_params = st.query_params
+st.set_page_config(page_title="Pagamento")
 
+# pegar plano da URL
+query_params = st.query_params
 plano = query_params.get("plano", "basico")
+
+# definir valores
 if plano == "basico":
     nome_plano = "Básico"
     preco = "R$500"
@@ -14,8 +18,6 @@ elif plano == "profissional":
 else:
     nome_plano = "Premium"
     preco = "R$2000"
-
-st.set_page_config(page_title="Pagamento", layout="centered")
 
 # =========================
 # CONFIG

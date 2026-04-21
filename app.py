@@ -135,6 +135,8 @@ with col1:
     """, unsafe_allow_html=True)
 
     st.markdown("[Escolher Básico](?plano=basico)")
+    st.switch_page("pages/pagamento.py?plano=basico")
+
 
 with col2:
     msg = "Quero o plano Profissional (R$1000)"
@@ -150,6 +152,8 @@ with col2:
     """, unsafe_allow_html=True)
 
     st.markdown("[Escolher Profissional](?plano=profissional)")
+    st.switch_page("pages/pagamento.py?plano=profissional")
+
 
 with col3:
     msg = "Quero o plano Premium (R$2000)"
@@ -165,6 +169,7 @@ with col3:
     """, unsafe_allow_html=True)
 
     st.markdown("[Escolher Premium](?plano=premium)")
+    st.switch_page("pages/pagamento.py?plano=premium")
 
 
 st.divider()
