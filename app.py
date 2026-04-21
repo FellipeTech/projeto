@@ -135,7 +135,9 @@ with col1:
     """, unsafe_allow_html=True)
 
     st.markdown("[Escolher Básico](?plano=basico)")
-    st.switch_page("pages/pagamento.py?plano=basico")
+    if st.button("Escolher Básico"):
+        st.switch_page("pages/pagamento.py?plano=basico")
+
 
 
 with col2:
@@ -152,7 +154,8 @@ with col2:
     """, unsafe_allow_html=True)
 
     st.markdown("[Escolher Profissional](?plano=profissional)")
-    st.switch_page("pages/pagamento.py?plano=profissional")
+    if st.button("Escolher Profissional"):
+        st.switch_page("pages/pagamento.py?plano=profissional")
 
 
 with col3:
@@ -169,7 +172,8 @@ with col3:
     """, unsafe_allow_html=True)
 
     st.markdown("[Escolher Premium](?plano=premium)")
-    st.switch_page("pages/pagamento.py?plano=premium")
+    if st.button("Escolher Premium"):
+        st.switch_page("pages/pagamento.py?plano=premium")
 
 
 st.divider()
