@@ -1,21 +1,10 @@
 import streamlit as st
-import urllib.parse
+import requests
+import time
 
-# =========================
-# CONFIG
-# =========================
+API_URL = "http://localhost:8000"
+
 st.set_page_config(page_title="Pagamento", layout="centered")
-
-numero = "5573999946196"
-
-# Pix copia e cola
-pix_copia_cola = "00020101021126330014br.gov.bcb.pix0111097492825905204000053039865802BR5920FELLIPE F BITENCOURT6007ITABUNA62070503***6304F001"
-
-# =========================
-# FUNÇÃO WHATSAPP
-# =========================
-def criar_link(msg):
-    return f"https://wa.me/{numero}?text={urllib.parse.quote(msg)}"
 
 # =========================
 # PLANOS
@@ -41,22 +30,43 @@ Valor: R${valor}
 """)
 
 # =========================
-# PAGAMENTO PIX
+# GERAR PIX
 # =========================
-st.header("💸 Pagamento via Pix")
+if st.button("Gerar Pix"):
+    response = requests.post(f"{API_URL}/gerar_pix", json={
+        "valor": valor,
+        "descricao": f"Plano {plano}"
+    })
 
-st.write("Copie o código abaixo e pague no seu banco:")
+    data = response.json()
 
-st.code(pix_copia_cola)
-
-st.caption("Após o pagamento, clique em confirmar abaixo 👇")
+    st.session_state["txid"] = data["txid"]
+    st.session_state["pix"] = data["pix"]
 
 # =========================
-# CONFIRMAÇÃO
+# MOSTRAR PIX
 # =========================
-st.divider()
+if "pix" in st.session_state:
 
-msg = f"Já fiz o pagamento do plano {plano} (R${valor})"
-link = criar_link(msg)
+    st.header("💸 Pagamento via Pix")
 
-st.markdown(f"[📲 Confirmar no WhatsApp]({link})")
+    st.code(st.session_state["pix"])
+
+    st.info("Após pagar, o sistema confirma automaticamente...")
+
+# =========================
+# AUTO VERIFICAÇÃO
+# =========================
+if "txid" in st.session_state:
+
+    status = requests.get(
+        f"{API_URL}/status/{st.session_state['txid']}"
+    ).json()
+
+    if status["status"] == "PAGO":
+        st.success("✅ Pagamento confirmado automaticamente!")
+        st.balloons()
+    else:
+        st.warning("⏳ Aguardando pagamento...")
+        time.sleep(5)
+        st.rerun()

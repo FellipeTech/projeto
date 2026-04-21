@@ -14,11 +14,11 @@ CHAVE_PIX = "SUA_CHAVE_PIX"
 CERT_PATH = "certificado.pem"
 KEY_PATH = "chave.pem"
 
-# banco simples (substituir depois)
+# "banco" temporário
 pagamentos = {}
 
 # =========================
-# GERAR TOKEN
+# TOKEN
 # =========================
 def gerar_token():
     url = "https://cdpj.partners.bancointer.com.br/oauth/v2/token"
@@ -79,7 +79,7 @@ def gerar_pix(dados: dict):
     }
 
 # =========================
-# WEBHOOK (INTER CHAMA AQUI)
+# WEBHOOK (AUTOMAÇÃO)
 # =========================
 @app.post("/webhook")
 async def webhook(request: Request):
@@ -99,7 +99,7 @@ async def webhook(request: Request):
     return {"ok": True}
 
 # =========================
-# CONSULTAR STATUS
+# STATUS
 # =========================
 @app.get("/status/{txid}")
 def status(txid: str):
