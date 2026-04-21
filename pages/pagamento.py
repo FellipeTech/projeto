@@ -1,6 +1,4 @@
 import streamlit as st
-import qrcode
-from io import BytesIO
 import urllib.parse
 
 # =========================
@@ -12,16 +10,10 @@ numero = "5573999946196"  # seu WhatsApp
 pix_chave = "09749282590"
 
 # =========================
-# FUNÇÕES
+# FUNÇÃO WHATSAPP
 # =========================
 def criar_link(msg):
     return f"https://wa.me/{numero}?text={urllib.parse.quote(msg)}"
-
-def gerar_qrcode(dado):
-    qr = qrcode.make(dado)
-    buf = BytesIO()
-    qr.save(buf)
-    return buf.getvalue()
 
 # =========================
 # ESTILO
@@ -81,10 +73,8 @@ st.markdown(f"""
 # =========================
 st.header("💸 Pagamento via Pix")
 
-qr_img = gerar_qrcode(pix_chave)
-st.image(qr_img, caption="Escaneie para pagar")
-
-st.code(pix_chave, language="")
+st.write("Use a chave abaixo para realizar o pagamento:")
+st.code(pix_chave)
 
 # =========================
 # PAGAMENTO CARTÃO (SIMULADO)
@@ -102,7 +92,7 @@ with col2:
 col3, col4 = st.columns(2)
 
 with col3:
-    validade = st.text_input("Validade")
+    validade = st.text_input("Validade (MM/AA)")
 
 with col4:
     cvv = st.text_input("CVV")
