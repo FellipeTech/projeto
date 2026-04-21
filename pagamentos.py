@@ -2,6 +2,18 @@ import streamlit as st
 import qrcode
 from io import BytesIO
 import urllib.parse
+query_params = st.query_params
+
+plano = query_params.get("plano", "basico")
+if plano == "basico":
+    nome_plano = "Básico"
+    preco = "R$500"
+elif plano == "profissional":
+    nome_plano = "Profissional"
+    preco = "R$1000"
+else:
+    nome_plano = "Premium"
+    preco = "R$2000"
 
 st.set_page_config(page_title="Pagamento", layout="centered")
 
@@ -54,6 +66,11 @@ plano = st.selectbox("Escolha seu plano:", [
 # RESUMO
 # =========================
 st.markdown(f"""
+### 📦 Resumo
+Plano: {nome_plano}  
+Valor: {preco}
+""")
+st.markdown(f"""
 <div class="box">
 <h3>📦 Resumo do pedido</h3>
 <p><b>Plano:</b> {plano}</p>
@@ -95,8 +112,9 @@ st.button("Pagar com cartão")
 st.divider()
 
 st.header("✅ Já realizou o pagamento?")
+msg = f"Já fiz o pagamento do plano {nome_plano} ({preco})"
+link = f"https://wa.me/{numero}?text={urllib.parse.quote(msg)}"
 
-msg = f"Já fiz o pagamento do plano: {plano}"
-link = criar_link(msg)
+st.markdown(f"[Confirmar pagamento no WhatsApp]({link})")
 
-st.markdown(f"[📲 Confirmar pagamento no WhatsApp]({link})")
+

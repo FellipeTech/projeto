@@ -134,7 +134,7 @@ with col1:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown(f"[Escolher plano]({link})")
+    st.markdown("[Escolher Básico](?plano=basico)")
 
 with col2:
     msg = "Quero o plano Profissional (R$1000)"
@@ -149,7 +149,7 @@ with col2:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown(f"[Mais escolhido]({link})")
+    st.markdown("[Escolher Profissional](?plano=profissional)")
 
 with col3:
     msg = "Quero o plano Premium (R$2000)"
@@ -164,7 +164,8 @@ with col3:
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown(f"[Quero o melhor]({link})")
+    st.markdown("[Escolher Premium](?plano=premium)")
+
 
 st.divider()
 
