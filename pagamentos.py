@@ -70,14 +70,14 @@ st.markdown(f"""
 Plano: {nome_plano}  
 Valor: {preco}
 """)
-st.markdown(f"""
-<div class="box">
-<h3>📦 Resumo do pedido</h3>
-<p><b>Plano:</b> {plano}</p>
-<p>✔ Entrega rápida</p>
-<p>✔ Suporte incluído</p>
-</div>
-""", unsafe_allow_html=True)
+#st.markdown(f"""
+#<div class="box">
+#<h3>📦 Resumo do pedido</h3>
+#<p><b>Plano:</b> {plano}</p>
+#<p>✔ Entrega rápida</p>
+#<p>✔ Suporte incluído</p>
+#</div>
+#""", unsafe_allow_html=True)
 
 # =========================
 # PAGAMENTO PIX
