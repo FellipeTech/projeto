@@ -1,100 +1,79 @@
 from fastapi import FastAPI, Request
-import requests
 import uuid
 
 app = FastAPI()
 
 # =========================
-# CONFIG INTER
+# "BANCO" TEMPORÁRIO
 # =========================
-CLIENT_ID = "SEU_CLIENT_ID"
-CLIENT_SECRET = "SEU_CLIENT_SECRET"
-CHAVE_PIX = "SUA_CHAVE_PIX"
-
-CERT_PATH = "certificado.pem"
-KEY_PATH = "chave.pem"
-
-# "banco" temporário
+usuarios = {}
 pagamentos = {}
 
 # =========================
-# TOKEN
+# CADASTRO
 # =========================
-def gerar_token():
-    url = "https://cdpj.partners.bancointer.com.br/oauth/v2/token"
+@app.post("/register")
+def register(dados: dict):
+    email = dados["email"]
 
-    data = {
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-        "grant_type": "client_credentials",
-        "scope": "pix.write pix.read"
+    if email in usuarios:
+        return {"erro": "Usuário já existe"}
+
+    usuarios[email] = {
+        "senha": dados["senha"],
+        "ativo": False
     }
 
-    response = requests.post(
-        url,
-        data=data,
-        cert=(CERT_PATH, KEY_PATH)
-    )
-
-    return response.json()["access_token"]
+    return {"msg": "Usuário criado"}
 
 # =========================
-# GERAR PIX REAL
+# LOGIN
+# =========================
+@app.post("/login")
+def login(dados: dict):
+    user = usuarios.get(dados["email"])
+
+    if not user or user["senha"] != dados["senha"]:
+        return {"erro": "Login inválido"}
+
+    return {
+        "msg": "ok",
+        "ativo": user["ativo"]
+    }
+
+# =========================
+# GERAR PIX
 # =========================
 @app.post("/gerar_pix")
 def gerar_pix(dados: dict):
 
-    token = gerar_token()
+    txid = str(uuid.uuid4())
 
-    txid = str(uuid.uuid4())[:30]
-
-    url = f"https://cdpj.partners.bancointer.com.br/pix/v2/cob/{txid}"
-
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
+    pagamentos[txid] = {
+        "email": dados["email"],
+        "status": "PENDENTE"
     }
 
-    body = {
-        "calendario": {"expiracao": 3600},
-        "valor": {"original": f"{dados['valor']:.2f}"},
-        "chave": CHAVE_PIX,
-        "solicitacaoPagador": dados["descricao"]
-    }
-
-    response = requests.put(
-        url,
-        json=body,
-        headers=headers,
-        cert=(CERT_PATH, KEY_PATH)
-    )
-
-    resposta = response.json()
-
-    pagamentos[txid] = "PENDENTE"
+    pix_fake = f"PIX-{txid}"
 
     return {
         "txid": txid,
-        "pix": resposta["pixCopiaECola"]
+        "pix": pix_fake
     }
 
 # =========================
-# WEBHOOK (AUTOMAÇÃO)
+# WEBHOOK (SIMULADO)
 # =========================
 @app.post("/webhook")
 async def webhook(request: Request):
     data = await request.json()
 
-    try:
-        pix = data["pix"][0]
-        txid = pix["txid"]
+    txid = data["txid"]
 
-        pagamentos[txid] = "PAGO"
+    pagamentos[txid]["status"] = "PAGO"
 
-        print("Pagamento confirmado:", txid)
-
-    except:
-        print("Erro no webhook")
+    email = pagamentos[txid]["email"]
+    usuarios[email]["ativo"] = True
 
     return {"ok": True}
 
@@ -103,4 +82,4 @@ async def webhook(request: Request):
 # =========================
 @app.get("/status/{txid}")
 def status(txid: str):
-    return {"status": pagamentos.get(txid, "PENDENTE")}
+    return pagamentos.get(txid, {})
