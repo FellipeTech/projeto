@@ -1,4 +1,5 @@
 import streamlit as st
+import mercadopago
 import urllib.parse
 
 # =========================
@@ -6,44 +7,16 @@ import urllib.parse
 # =========================
 st.set_page_config(page_title="Pagamento", layout="centered")
 
-numero = "5573999946196"  # WhatsApp
+ACCESS_TOKEN = "SEU_ACCESS_TOKEN_AQUI"
+sdk = mercadopago.SDK(ACCESS_TOKEN)
 
-# Pix copia e cola (EMV)
-pix_copia_cola = "00020101021126330014br.gov.bcb.pix0111097492825905204000053039865802BR5920FELLIPE F BITENCOURT6007ITABUNA62070503***6304F001"
+numero = "5573999946196"
 
 # =========================
 # FUNÇÃO WHATSAPP
 # =========================
 def criar_link(msg):
     return f"https://wa.me/{numero}?text={urllib.parse.quote(msg)}"
-
-# =========================
-# ESTILO
-# =========================
-st.markdown("""
-<style>
-.main {
-    background-color: #0E1117;
-}
-h1, h2, h3 {
-    color: white;
-}
-p {
-    color: #cfcfcf;
-}
-.box {
-    padding: 20px;
-    border-radius: 12px;
-    background: #161b22;
-    margin-bottom: 20px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# =========================
-# TÍTULO
-# =========================
-st.title("💳 Finalizar pagamento")
 
 # =========================
 # PLANOS
@@ -54,68 +27,64 @@ planos = {
     "Premium": 2000
 }
 
-plano_escolhido = st.selectbox("Escolha seu plano:", list(planos.keys()))
-preco = planos[plano_escolhido]
+st.title("💳 Finalizar pagamento")
+
+plano = st.selectbox("Escolha seu plano:", list(planos.keys()))
+valor = planos[plano]
 
 # =========================
-# RESUMO
+# CRIAR PAGAMENTO PIX
 # =========================
-st.markdown(f"""
-<div class="box">
-<h3>📦 Resumo do pedido</h3>
-<p><b>Plano:</b> {plano_escolhido}</p>
-<p><b>Valor:</b> R${preco}</p>
-<p>✔ Entrega rápida</p>
-<p>✔ Suporte incluído</p>
-</div>
-""", unsafe_allow_html=True)
+if st.button("Gerar Pix"):
+    payment_data = {
+        "transaction_amount": valor,
+        "description": f"Plano {plano}",
+        "payment_method_id": "pix",
+        "payer": {
+            "email": "cliente@email.com"
+        }
+    }
 
-# =========================
-# PAGAMENTO PIX (CÓPIA E COLA)
-# =========================
-st.header("💸 Pagamento via Pix")
+    pagamento = sdk.payment().create(payment_data)
+    resposta = pagamento["response"]
 
-st.write("Copie o código abaixo e pague no seu banco:")
+    pix_code = resposta["point_of_interaction"]["transaction_data"]["qr_code"]
+    qr_base64 = resposta["point_of_interaction"]["transaction_data"]["qr_code_base64"]
 
-st.code(pix_copia_cola)
+    st.success("Pix gerado!")
 
-st.caption("Após o pagamento, clique em confirmar abaixo 👇")
-
-# =========================
-# PAGAMENTO CARTÃO (SIMULADO)
-# =========================
-st.header("💳 Cartão (simulação)")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    numero_cartao = st.text_input("Número do cartão")
-
-with col2:
-    nome_cartao = st.text_input("Nome no cartão")
-
-col3, col4 = st.columns(2)
-
-with col3:
-    validade = st.text_input("Validade (MM/AA)")
-
-with col4:
-    cvv = st.text_input("CVV")
-
-if st.button("Pagar com cartão"):
-    if numero_cartao and nome_cartao and validade and cvv:
-        st.success("Pagamento simulado com sucesso!")
-    else:
-        st.error("Preencha todos os campos")
+    st.image(f"data:image/png;base64,{qr_base64}")
+    st.code(pix_code)
 
 # =========================
-# CONFIRMAÇÃO
+# PAGAMENTO CARTÃO
+# =========================
+st.header("💳 Cartão")
+
+st.write("Pagamento com cartão (via Mercado Pago Checkout):")
+
+preference_data = {
+    "items": [
+        {
+            "title": f"Plano {plano}",
+            "quantity": 1,
+            "currency_id": "BRL",
+            "unit_price": valor
+        }
+    ]
+}
+
+preference = sdk.preference().create(preference_data)
+link_pagamento = preference["response"]["init_point"]
+
+st.markdown(f"[👉 Pagar com cartão]({link_pagamento})")
+
+# =========================
+# WHATSAPP
 # =========================
 st.divider()
 
-st.header("✅ Já realizou o pagamento?")
+msg = f"Já fiz o pagamento do plano {plano} (R${valor})"
+link = criar_link(msg)
 
-mensagem = f"Já fiz o pagamento do plano {plano_escolhido} (R${preco})"
-link = criar_link(mensagem)
-
-st.markdown(f"[📲 Confirmar pagamento no WhatsApp]({link})")
+st.markdown(f"[📲 Confirmar no WhatsApp]({link})")
