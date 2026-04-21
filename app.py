@@ -1,4 +1,121 @@
 import streamlit as st
+import requests
+import time
+
+API = "http://localhost:8000"
+
+st.set_page_config(page_title="Sistema")
+
+# MENU
+if "user" not in st.session_state:
+    menu = st.sidebar.selectbox("Menu", ["Login", "Cadastro"])
+else:
+    if st.session_state.get("admin"):
+        menu = st.sidebar.selectbox("Menu", ["Admin", "Sair"])
+    else:
+        menu = st.sidebar.selectbox(
+            "Menu",
+            ["Dashboard", "Meus Sites", "Pagamento", "Sair"]
+        )
+
+# CADASTRO
+if menu == "Cadastro":
+    st.title("Cadastro")
+
+    email = st.text_input("Email")
+    senha = st.text_input("Senha", type="password")
+
+    if st.button("Cadastrar"):
+        r = requests.post(f"{API}/register", json={
+            "email": email,
+            "senha": senha
+        }).json()
+
+        st.write(r)
+
+# LOGIN
+if menu == "Login":
+    st.title("Login")
+
+    email = st.text_input("Email")
+    senha = st.text_input("Senha", type="password")
+
+    if st.button("Entrar"):
+        r = requests.post(f"{API}/login", json={
+            "email": email,
+            "senha": senha
+        }).json()
+
+        if "erro" in r:
+            st.error("Erro")
+        else:
+            st.session_state["user"] = email
+            st.session_state["admin"] = r["admin"]
+            st.session_state["ativo"] = r["ativo"]
+
+# DASHBOARD
+if menu == "Dashboard":
+    st.title("Área do membro")
+
+    user = requests.get(f"{API}/usuario/{st.session_state['user']}").json()
+
+    if user.get("ativo"):
+        st.success("Acesso liberado")
+    else:
+        st.warning("Precisa pagar")
+
+# MEUS SITES
+if menu == "Meus Sites":
+    st.title("Seus sites")
+
+    user = requests.get(f"{API}/usuario/{st.session_state['user']}").json()
+
+    for site in user.get("sites", []):
+        st.success(site)
+
+# PAGAMENTO
+if menu == "Pagamento":
+    st.title("Pagamento")
+
+    if st.button("Gerar Pix"):
+        r = requests.post(f"{API}/gerar_pix", json={
+            "email": st.session_state["user"]
+        }).json()
+
+        st.session_state["txid"] = r["txid"]
+        st.code(r["pix"])
+
+    if "txid" in st.session_state:
+        status = requests.get(
+            f"{API}/status/{st.session_state['txid']}"
+        ).json()
+
+        if status.get("status") == "PAGO":
+            st.success("Pago!")
+        else:
+            st.warning("Aguardando...")
+            time.sleep(5)
+            st.rerun()
+
+# ADMIN
+if menu == "Admin":
+    st.title("Admin")
+
+    usuarios = requests.get(f"{API}/usuarios").json()
+
+    for email, dados in usuarios.items():
+        st.write(email, dados)
+
+        if not dados.get("ativo"):
+            if st.button(f"Ativar {email}"):
+                requests.post(f"{API}/ativar", json={"email": email})
+                st.rerun()
+
+# SAIR
+if menu == "Sair":
+    st.session_state.clear()
+    st.rerun()
+import streamlit as st
 import urllib.parse
 
 st.set_page_config(page_title="Dev Freelancer", layout="wide")
