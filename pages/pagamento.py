@@ -124,5 +124,3 @@ mensagem = f"Já fiz o pagamento do plano {plano_escolhido} (R${preco})"
 link = criar_link(mensagem)
 
 st.markdown(f"[📲 Confirmar pagamento no WhatsApp]({link})")
-
-
