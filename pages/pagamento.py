@@ -1,5 +1,4 @@
 import streamlit as st
-import mercadopago
 import urllib.parse
 
 # =========================
@@ -7,10 +6,10 @@ import urllib.parse
 # =========================
 st.set_page_config(page_title="Pagamento", layout="centered")
 
-ACCESS_TOKEN = "SEU_ACCESS_TOKEN_AQUI"
-sdk = mercadopago.SDK(ACCESS_TOKEN)
-
 numero = "5573999946196"
+
+# Pix copia e cola
+pix_copia_cola = "00020101021126330014br.gov.bcb.pix0111097492825905204000053039865802BR5920FELLIPE F BITENCOURT6007ITABUNA62070503***6304F001"
 
 # =========================
 # FUNÇÃO WHATSAPP
@@ -33,54 +32,27 @@ plano = st.selectbox("Escolha seu plano:", list(planos.keys()))
 valor = planos[plano]
 
 # =========================
-# CRIAR PAGAMENTO PIX
+# RESUMO
 # =========================
-if st.button("Gerar Pix"):
-    payment_data = {
-        "transaction_amount": valor,
-        "description": f"Plano {plano}",
-        "payment_method_id": "pix",
-        "payer": {
-            "email": "cliente@email.com"
-        }
-    }
-
-    pagamento = sdk.payment().create(payment_data)
-    resposta = pagamento["response"]
-
-    pix_code = resposta["point_of_interaction"]["transaction_data"]["qr_code"]
-    qr_base64 = resposta["point_of_interaction"]["transaction_data"]["qr_code_base64"]
-
-    st.success("Pix gerado!")
-
-    st.image(f"data:image/png;base64,{qr_base64}")
-    st.code(pix_code)
+st.markdown(f"""
+### 📦 Resumo
+Plano: {plano}  
+Valor: R${valor}
+""")
 
 # =========================
-# PAGAMENTO CARTÃO
+# PAGAMENTO PIX
 # =========================
-st.header("💳 Cartão")
+st.header("💸 Pagamento via Pix")
 
-st.write("Pagamento com cartão (via Mercado Pago Checkout):")
+st.write("Copie o código abaixo e pague no seu banco:")
 
-preference_data = {
-    "items": [
-        {
-            "title": f"Plano {plano}",
-            "quantity": 1,
-            "currency_id": "BRL",
-            "unit_price": valor
-        }
-    ]
-}
+st.code(pix_copia_cola)
 
-preference = sdk.preference().create(preference_data)
-link_pagamento = preference["response"]["init_point"]
-
-st.markdown(f"[👉 Pagar com cartão]({link_pagamento})")
+st.caption("Após o pagamento, clique em confirmar abaixo 👇")
 
 # =========================
-# WHATSAPP
+# CONFIRMAÇÃO
 # =========================
 st.divider()
 
