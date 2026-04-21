@@ -2,30 +2,26 @@ import streamlit as st
 import qrcode
 from io import BytesIO
 import urllib.parse
-st.set_page_config(page_title="Pagamento")
-
-# pegar plano da URL
-query_params = st.query_params
-plano = query_params.get("plano", "basico")
-
-# definir valores
-if plano == "basico":
-    nome_plano = "Básico"
-    preco = "R$500"
-elif plano == "profissional":
-    nome_plano = "Profissional"
-    preco = "R$1000"
-else:
-    nome_plano = "Premium"
-    preco = "R$2000"
 
 # =========================
 # CONFIG
 # =========================
-numero = "5573999946196"  # seu WhatsApp
+st.set_page_config(page_title="Pagamento", layout="centered")
 
+numero = "5573999946196"  # seu WhatsApp
+pix_chave = "09749282590"
+
+# =========================
+# FUNÇÕES
+# =========================
 def criar_link(msg):
     return f"https://wa.me/{numero}?text={urllib.parse.quote(msg)}"
+
+def gerar_qrcode(dado):
+    qr = qrcode.make(dado)
+    buf = BytesIO()
+    qr.save(buf)
+    return buf.getvalue()
 
 # =========================
 # ESTILO
@@ -56,57 +52,66 @@ p {
 st.title("💳 Finalizar pagamento")
 
 # =========================
-# ESCOLHA DO PLANO
+# PLANOS
 # =========================
-plano = st.selectbox("Escolha seu plano:", [
-    "Básico - R$500",
-    "Profissional - R$1000",
-    "Premium - R$2000"
-])
+planos = {
+    "Básico": 500,
+    "Profissional": 1000,
+    "Premium": 2000
+}
+
+plano_escolhido = st.selectbox("Escolha seu plano:", list(planos.keys()))
+preco = planos[plano_escolhido]
 
 # =========================
 # RESUMO
 # =========================
 st.markdown(f"""
-### 📦 Resumo
-Plano: {nome_plano}  
-Valor: {preco}
-""")
-#st.markdown(f"""
-#<div class="box">
-#<h3>📦 Resumo do pedido</h3>
-#<p><b>Plano:</b> {plano}</p>
-#<p>✔ Entrega rápida</p>
-#<p>✔ Suporte incluído</p>
-#</div>
-#""", unsafe_allow_html=True)
+<div class="box">
+<h3>📦 Resumo do pedido</h3>
+<p><b>Plano:</b> {plano_escolhido}</p>
+<p><b>Valor:</b> R${preco}</p>
+<p>✔ Entrega rápida</p>
+<p>✔ Suporte incluído</p>
+</div>
+""", unsafe_allow_html=True)
 
 # =========================
 # PAGAMENTO PIX
 # =========================
 st.header("💸 Pagamento via Pix")
 
-pix_chave = "09749282590"
+qr_img = gerar_qrcode(pix_chave)
+st.image(qr_img, caption="Escaneie para pagar")
 
-# gerar QR code
-qr = qrcode.make(pix_chave)
-buf = BytesIO()
-qr.save(buf)
-st.image(buf.getvalue(), caption="Escaneie para pagar")
-
-st.write(f"🔑 Chave Pix: {pix_chave}")
+st.code(pix_chave, language="")
 
 # =========================
 # PAGAMENTO CARTÃO (SIMULADO)
 # =========================
 st.header("💳 Cartão (simulação)")
 
-st.text_input("Número do cartão")
-st.text_input("Nome no cartão")
-st.text_input("Validade")
-st.text_input("CVV")
+col1, col2 = st.columns(2)
 
-st.button("Pagar com cartão")
+with col1:
+    numero_cartao = st.text_input("Número do cartão")
+
+with col2:
+    nome_cartao = st.text_input("Nome no cartão")
+
+col3, col4 = st.columns(2)
+
+with col3:
+    validade = st.text_input("Validade")
+
+with col4:
+    cvv = st.text_input("CVV")
+
+if st.button("Pagar com cartão"):
+    if numero_cartao and nome_cartao and validade and cvv:
+        st.success("Pagamento simulado com sucesso!")
+    else:
+        st.error("Preencha todos os campos")
 
 # =========================
 # CONFIRMAÇÃO
@@ -114,9 +119,10 @@ st.button("Pagar com cartão")
 st.divider()
 
 st.header("✅ Já realizou o pagamento?")
-msg = f"Já fiz o pagamento do plano {nome_plano} ({preco})"
-link = f"https://wa.me/{numero}?text={urllib.parse.quote(msg)}"
 
-st.markdown(f"[Confirmar pagamento no WhatsApp]({link})")
+mensagem = f"Já fiz o pagamento do plano {plano_escolhido} (R${preco})"
+link = criar_link(mensagem)
+
+st.markdown(f"[📲 Confirmar pagamento no WhatsApp]({link})")
 
 
