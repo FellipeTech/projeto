@@ -1,29 +1,30 @@
 import streamlit as st
+import urllib.parse
 
-# CONFIG
 st.set_page_config(page_title="Dev Freelancer", layout="wide")
 
 # =========================
-# ESTILO (CSS)
+# CONFIG WHATSAPP
+# =========================
+numero = "5573999946196"
+
+def criar_link(msg):
+    return f"https://wa.me/{numero}?text={urllib.parse.quote(msg)}"
+
+# =========================
+# ESTILO
 # =========================
 st.markdown("""
 <style>
-html, body, [class*="css"] {
-    font-family: 'Arial', sans-serif;
-}
-
 .main {
     background-color: #0E1117;
 }
-
 h1, h2, h3 {
     color: white;
 }
-
 p {
     color: #cfcfcf;
 }
-
 .stButton>button {
     width: 100%;
     border-radius: 10px;
@@ -34,7 +35,6 @@ p {
     color: white;
     border: none;
 }
-
 .box {
     padding: 20px;
     border-radius: 12px;
@@ -54,19 +54,19 @@ with col1:
 
     st.write("""
     Eu crio sites rápidos, modernos e pensados para gerar resultado.  
-    Nada de site bonito que não vende.
+    Seu site deixa de ser só bonito e passa a **vender de verdade**.
     """)
 
-    st.markdown("### ⚡ Entrega rápida | 🎯 Foco em conversão | 💰 Mais clientes")
-
-    st.button("🔥 Quero meu site agora")
+    link = criar_link("Olá! Quero criar um site profissional que gere clientes.")
+    st.markdown(f"[🔥 Quero meu site agora]({link})")
 
 with col2:
-    st.markdown("""
+    link = criar_link("Olá! Vim pelo site e quero mais informações.")
+    st.markdown(f"""
     <div class="box">
     <h3>💬 Fale comigo</h3>
     <p>Resposta rápida no WhatsApp</p>
-    <a href="https://wa.me/5573999946196" target="_blank">
+    <a href="{link}" target="_blank">
         <button style="width:100%;padding:10px;background:#25D366;color:white;border:none;border-radius:8px;">
         Chamar no WhatsApp
         </button>
@@ -79,40 +79,20 @@ st.divider()
 # =========================
 # PROVA SOCIAL
 # =========================
-st.header("⭐ Quem já trabalhou comigo")
+st.header("⭐ Resultados reais")
 
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown("""
-    <div class="box">
-    💬 "Meu site começou a gerar clientes todo dia"  
-    <br><br>— Cliente local
-    </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown("""
-    <div class="box">
-    💬 "Entrega rápida e muito profissional"  
-    <br><br>— Empreendedora
-    </div>
-    """, unsafe_allow_html=True)
-
-with col3:
-    st.markdown("""
-    <div class="box">
-    💬 "Valeu cada centavo investido"  
-    <br><br>— Loja online
-    </div>
-    """, unsafe_allow_html=True)
+st.write("""
+💬 "Comecei a receber clientes toda semana"  
+💬 "Entrega rápida e profissional"  
+💬 "Valeu cada centavo"
+""")
 
 st.divider()
 
 # =========================
 # PORTFÓLIO
 # =========================
-st.header("📁 Projetos recentes")
+st.header("📁 Projetos")
 
 col1, col2 = st.columns(2)
 
@@ -120,73 +100,71 @@ with col1:
     st.markdown("""
     <div class="box">
     <h4>🛍️ Loja Virtual</h4>
-    <p>Site antigo lento → Novo site otimizado</p>
-    <p><b>Resultado:</b> +60% vendas</p>
+    <p>+60% nas vendas após novo site</p>
     </div>
     """, unsafe_allow_html=True)
 
 with col2:
     st.markdown("""
     <div class="box">
-    <h4>💼 Site empresarial</h4>
-    <p>Sem presença online → Site profissional</p>
-    <p><b>Resultado:</b> novos clientes toda semana</p>
+    <h4>💼 Site Empresarial</h4>
+    <p>Novos clientes toda semana</p>
     </div>
     """, unsafe_allow_html=True)
 
 st.divider()
 
 # =========================
-# PLANOS
+# PLANOS COM PAGAMENTO
 # =========================
-st.header("💰 Escolha seu plano")
+st.header("💰 Planos")
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
+    msg = "Quero o plano Básico (R$500)"
+    link = criar_link(msg)
+
     st.markdown("""
     <div class="box">
     <h3>💡 Básico</h3>
-    <p>✔ 1 página<br>✔ Design simples<br>✔ Rápido</p>
+    <p>✔ 1 página<br>✔ Design simples<br>✔ Entrega rápida</p>
     <h2>R$ 500</h2>
+    <p>💳 Pix / Cartão</p>
     </div>
     """, unsafe_allow_html=True)
-    st.button("Começar")
+
+    st.markdown(f"[Escolher plano]({link})")
 
 with col2:
+    msg = "Quero o plano Profissional (R$1000)"
+    link = criar_link(msg)
+
     st.markdown("""
     <div class="box">
     <h3>🚀 Profissional</h3>
-    <p>✔ Até 5 páginas<br>✔ Design moderno<br>✔ Conversão</p>
+    <p>✔ Até 5 páginas<br>✔ Design moderno<br>✔ Foco em conversão</p>
     <h2>R$ 1000</h2>
+    <p>💳 Pix / Cartão / Parcelado</p>
     </div>
     """, unsafe_allow_html=True)
-    st.button("Mais escolhido")
+
+    st.markdown(f"[Mais escolhido]({link})")
 
 with col3:
+    msg = "Quero o plano Premium (R$2000)"
+    link = criar_link(msg)
+
     st.markdown("""
     <div class="box">
     <h3>🔥 Premium</h3>
-    <p>✔ Completo<br>✔ Performance<br>✔ Estratégia</p>
+    <p>✔ Site completo<br>✔ Alta performance<br>✔ Estratégia de vendas</p>
     <h2>R$ 2000</h2>
+    <p>💳 Pix / Cartão / Parcelado</p>
     </div>
     """, unsafe_allow_html=True)
-    st.button("Quero o melhor")
 
-st.divider()
-
-# =========================
-# PROCESSO
-# =========================
-st.header("⚙️ Como funciona")
-
-st.write("""
-1. 📋 Briefing  
-2. 🧠 Planejamento  
-3. 🎨 Design  
-4. 💻 Desenvolvimento  
-5. 🚀 Entrega  
-""")
+    st.markdown(f"[Quero o melhor]({link})")
 
 st.divider()
 
@@ -195,9 +173,9 @@ st.divider()
 # =========================
 st.header("🔥 Pronto para ter um site que vende?")
 
-st.write("Quanto mais você espera, mais clientes perde.")
+link = criar_link("Quero começar meu projeto agora!")
 
-st.button("🚀 Começar agora")
+st.markdown(f"[🚀 Começar agora]({link})")
 
 st.divider()
 
@@ -208,5 +186,5 @@ st.header("📞 Contato")
 
 st.write("""
 📧 fellipedgtech@gmail.com  
-📱 (73) 99994-6196  
+📱 WhatsApp disponível acima  
 """)
