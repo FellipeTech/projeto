@@ -96,31 +96,52 @@ planos = [
 
 cols = st.columns(3)
 for col, p in zip(cols, planos):
-    itens_html    = "".join(f'<li style="font-size:13px;color:{TEXT};margin:5px 0;padding-left:4px;">✓ {i}</li>' for i in p["itens"])
-    nao_html      = "".join(f'<li style="font-size:13px;color:{MUTED};margin:5px 0;padding-left:4px;text-decoration:line-through;">✗ {i}</li>' for i in p["nao_inclui"])
-    shadow        = f"box-shadow:0 0 60px {p['cor']}30;" if p["destaque"] else ""
-    border_width  = "2px" if p["destaque"] else "1px"
-    badge         = f'<div style="display:inline-block;background:{p["cor"]}22;color:{p["cor"]};border:1px solid {p["cor"]}44;border-radius:20px;font-size:10px;font-weight:700;font-family:Syne,sans-serif;text-transform:uppercase;letter-spacing:0.1em;padding:4px 10px;margin-bottom:12px;">⭐ Mais popular</div>' if p["destaque"] else ""
+    cor          = p["cor"]
+    nome         = p["nome"]
+    preco        = p["preco"]
+    emoji        = p["emoji"]
+    subtitulo    = p["subtitulo"]
+    destaque     = p["destaque"]
+    key          = p["key"]
+
+    itens_html   = "".join(f'<li style="font-size:13px;color:{TEXT};margin:5px 0;padding-left:4px;">✓ {i}</li>' for i in p["itens"])
+    nao_html     = "".join(f'<li style="font-size:13px;color:{MUTED};margin:5px 0;padding-left:4px;text-decoration:line-through;">✗ {i}</li>' for i in p["nao_inclui"])
+    shadow       = f"box-shadow:0 0 60px {cor}30;" if destaque else ""
+    border_width = "2px" if destaque else "1px"
+    badge        = f'<div style="display:inline-block;background:{cor}22;color:{cor};border:1px solid {cor}44;border-radius:20px;font-size:10px;font-weight:700;font-family:Syne,sans-serif;text-transform:uppercase;letter-spacing:0.1em;padding:4px 10px;margin-bottom:12px;">⭐ Mais popular</div>' if destaque else ""
+
+    nao_block    = f'<ul style="list-style:none;padding:0;margin:0 0 24px;">{nao_html}</ul>' if nao_html else '<div style="margin-bottom:24px;"></div>'
+
+    if destaque:
+        btn_bg    = f"linear-gradient(135deg,{cor},{cor}AA)"
+        btn_color = "#000"
+        btn_border = f"2px solid {cor}"
+    else:
+        btn_bg    = "transparent"
+        btn_color = cor
+        btn_border = f"1px solid {cor}"
+
+    wa_link = wa(f"Quero contratar o plano {nome} por {preco}")
 
     col.markdown(f"""
-    <div style="background:{CARD};border:{border_width} solid {p['cor']};border-radius:18px;padding:32px 24px;{shadow}height:100%;">
+    <div style="background:{CARD};border:{border_width} solid {cor};border-radius:18px;padding:32px 24px;{shadow}height:100%;">
         {badge}
-        <div style="font-size:32px;margin-bottom:10px;">{p['emoji']}</div>
-        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:{p['cor']};">{p['nome']}</div>
-        <div style="font-size:12px;color:{MUTED};margin:4px 0 20px;">{p['subtitulo']}</div>
+        <div style="font-size:32px;margin-bottom:10px;">{emoji}</div>
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:{cor};">{nome}</div>
+        <div style="font-size:12px;color:{MUTED};margin:4px 0 20px;">{subtitulo}</div>
         <div style="font-family:'Syne',sans-serif;font-size:38px;font-weight:800;color:{TEXT};margin-bottom:24px;">
-            {p['preco']}
+            {preco}
             <span style="font-size:14px;font-weight:400;color:{MUTED};">/ único</span>
         </div>
         <ul style="list-style:none;padding:0;margin:0 0 12px;">
             {itens_html}
         </ul>
-        {'<ul style="list-style:none;padding:0;margin:0 0 24px;">'+nao_html+'</ul>' if nao_html else '<div style="margin-bottom:24px;"></div>'}
-        <a href="{wa(f'Quero contratar o plano {p[\"nome\"]} por {p[\"preco\"]}')} " target="_blank" style="
+        {nao_block}
+        <a href="{wa_link}" target="_blank" style="
             display:block; text-align:center;
-            background:{'linear-gradient(135deg,'+p['cor']+','+p['cor']+'AA)' if p['destaque'] else 'transparent'};
-            color:{'#000' if p['destaque'] else p['cor']};
-            border:{'2px' if p['destaque'] else '1px'} solid {p['cor']};
+            background:{btn_bg};
+            color:{btn_color};
+            border:{btn_border};
             font-family:'Syne',sans-serif; font-weight:700; font-size:14px;
             padding:14px; border-radius:10px; text-decoration:none;
             margin-bottom:8px;
@@ -128,9 +149,8 @@ for col, p in zip(cols, planos):
     </div>
     """, unsafe_allow_html=True)
 
-    # Botão Streamlit para ir ao pagamento na plataforma
-    if col.button(f"Pagar online — {p['nome']}", key=p["key"]):
-        st.session_state["plano_selecionado"] = p["key"]
+    if col.button(f"Pagar online — {nome}", key=key):
+        st.session_state["plano_selecionado"] = key
         st.switch_page("pages/5_Pagamento.py")
 
 st.divider()

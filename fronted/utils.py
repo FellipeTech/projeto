@@ -204,4 +204,4 @@ def render_sidebar_nav():
 PLANOS_INFO = {
     "basico":       {"emoji": "⚡", "nome": "Básico",       "valor": 500,  "cor": "#556070"},
     "profissional": {"emoji": "🚀", "nome": "Profissional", "valor": 1000, "cor": ACCENT},
-    "premium":      {"emoji": "🔥", "nome": "Premium",      "valor": 2000, "cor": "#FFB000"},
+    "premium":      {"emoji": "🔥", "nome": "Premium",      "valor": 2000, "cor": "#FFB000"},}
