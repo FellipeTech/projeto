@@ -136,7 +136,8 @@ with col1:
 
     st.markdown("[Escolher Básico](?plano=basico)")
     if st.button("Escolher Básico"):
-        st.switch_page("pages/pagamento.py?plano=basico")
+        st.query_params["plano"] = "basico"
+        st.switch_page("pages/pagamento.py")
 
 
 
@@ -155,7 +156,8 @@ with col2:
 
     st.markdown("[Escolher Profissional](?plano=profissional)")
     if st.button("Escolher Profissional"):
-        st.switch_page("pages/pagamento.py?plano=profissional")
+        st.query_params["plano"] = "profissional"
+        st.switch_page("pages/pagamento.py")
 
 
 with col3:
@@ -173,7 +175,8 @@ with col3:
 
     st.markdown("[Escolher Premium](?plano=premium)")
     if st.button("Escolher Premium"):
-        st.switch_page("pages/pagamento.py?plano=premium")
+        st.query_params["plano"] = "premium"
+        st.switch_page("pages/pagamento.py")
 
 
 st.divider()
