@@ -21,7 +21,8 @@ def register(dados: dict):
 
     usuarios[email] = {
         "senha": dados["senha"],
-        "ativo": False
+        "ativo": False,
+        "sites": []
     }
 
     return {"msg": "Usuário criado"}
@@ -36,10 +37,22 @@ def login(dados: dict):
     if not user or user["senha"] != dados["senha"]:
         return {"erro": "Login inválido"}
 
-    return {
-        "msg": "ok",
-        "ativo": user["ativo"]
-    }
+    return {"msg": "ok", "ativo": user["ativo"]}
+
+# =========================
+# CONFIGURAR CONTA
+# =========================
+@app.post("/configurar")
+def configurar(dados: dict):
+    user = usuarios.get(dados["email"])
+
+    if not user:
+        return {"erro": "Usuário não encontrado"}
+
+    user["nome"] = dados.get("nome", "")
+    user["telefone"] = dados.get("telefone", "")
+
+    return {"msg": "Atualizado"}
 
 # =========================
 # GERAR PIX
@@ -73,7 +86,9 @@ async def webhook(request: Request):
     pagamentos[txid]["status"] = "PAGO"
 
     email = pagamentos[txid]["email"]
+
     usuarios[email]["ativo"] = True
+    usuarios[email]["sites"].append("Site Premium")
 
     return {"ok": True}
 
@@ -83,3 +98,10 @@ async def webhook(request: Request):
 @app.get("/status/{txid}")
 def status(txid: str):
     return pagamentos.get(txid, {})
+
+# =========================
+# PEGAR USUÁRIO
+# =========================
+@app.get("/usuario/{email}")
+def get_user(email: str):
+    return usuarios.get(email, {})

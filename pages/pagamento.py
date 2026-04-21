@@ -9,7 +9,13 @@ st.set_page_config(page_title="Área de Membros")
 # =========================
 # MENU
 # =========================
-menu = st.sidebar.selectbox("Menu", ["Login", "Cadastro"])
+if "user" not in st.session_state:
+    menu = st.sidebar.selectbox("Menu", ["Login", "Cadastro"])
+else:
+    menu = st.sidebar.selectbox(
+        "Menu",
+        ["Dashboard", "Configurações", "Meus Sites", "Pagamento", "Sair"]
+    )
 
 # =========================
 # CADASTRO
@@ -26,13 +32,16 @@ if menu == "Cadastro":
             "senha": senha
         }).json()
 
-        st.write(r)
+        if "erro" in r:
+            st.error(r["erro"])
+        else:
+            st.success("Conta criada!")
 
 # =========================
 # LOGIN
 # =========================
 if menu == "Login":
-    st.title("Login")
+    st.title("Entrar")
 
     email = st.text_input("Email")
     senha = st.text_input("Senha", type="password")
@@ -50,49 +59,92 @@ if menu == "Login":
             st.session_state["ativo"] = r["ativo"]
 
 # =========================
-# ÁREA LOGADA
+# DASHBOARD
 # =========================
-if "user" in st.session_state:
+if menu == "Dashboard" and "user" in st.session_state:
+    st.title("Dashboard")
 
-    st.sidebar.success(f"Logado: {st.session_state['user']}")
+    user = requests.get(f"{API}/usuario/{st.session_state['user']}").json()
 
-    if st.session_state["ativo"]:
-        st.success("🎉 Acesso liberado!")
-
-        st.write("Conteúdo exclusivo aqui 🔒")
-
+    if user.get("ativo"):
+        st.success("Conta ativa ✅")
     else:
-        st.warning("Você precisa pagar para liberar acesso")
+        st.warning("Conta não ativa")
 
-        planos = {
-            "Básico": 500,
-            "Premium": 1000
-        }
+# =========================
+# CONFIGURAÇÕES
+# =========================
+if menu == "Configurações":
+    st.title("Configurar conta")
 
-        plano = st.selectbox("Plano", list(planos.keys()))
-        valor = planos[plano]
+    nome = st.text_input("Nome")
+    telefone = st.text_input("Telefone")
 
-        if st.button("Gerar Pix"):
-            r = requests.post(f"{API}/gerar_pix", json={
-                "email": st.session_state["user"],
-                "valor": valor
-            }).json()
+    if st.button("Salvar"):
+        requests.post(f"{API}/configurar", json={
+            "email": st.session_state["user"],
+            "nome": nome,
+            "telefone": telefone
+        })
 
-            st.session_state["txid"] = r["txid"]
-            st.code(r["pix"])
+        st.success("Atualizado!")
 
-        # verificar pagamento
-        if "txid" in st.session_state:
+# =========================
+# MEUS SITES
+# =========================
+if menu == "Meus Sites":
+    st.title("Meus Sites")
 
-            status = requests.get(
-                f"{API}/status/{st.session_state['txid']}"
-            ).json()
+    user = requests.get(f"{API}/usuario/{st.session_state['user']}").json()
 
-            if status.get("status") == "PAGO":
-                st.success("Pagamento confirmado!")
-                st.session_state["ativo"] = True
-                st.rerun()
-            else:
-                st.warning("Aguardando pagamento...")
-                time.sleep(5)
-                st.rerun()
+    sites = user.get("sites", [])
+
+    if not sites:
+        st.warning("Você não tem sites ainda")
+    else:
+        for site in sites:
+            st.success(site)
+
+# =========================
+# PAGAMENTO
+# =========================
+if menu == "Pagamento":
+    st.title("Pagamento")
+
+    planos = {
+        "Básico": 500,
+        "Premium": 1000
+    }
+
+    plano = st.selectbox("Plano", list(planos.keys()))
+    valor = planos[plano]
+
+    if st.button("Gerar Pix"):
+        r = requests.post(f"{API}/gerar_pix", json={
+            "email": st.session_state["user"],
+            "valor": valor
+        }).json()
+
+        st.session_state["txid"] = r["txid"]
+        st.code(r["pix"])
+
+    if "txid" in st.session_state:
+        status = requests.get(
+            f"{API}/status/{st.session_state['txid']}"
+        ).json()
+
+        if status.get("status") == "PAGO":
+            st.success("Pagamento confirmado!")
+            st.session_state["ativo"] = True
+            st.rerun()
+        else:
+            st.warning("Aguardando pagamento...")
+            time.sleep(5)
+            st.rerun()
+
+# =========================
+# SAIR
+# =========================
+if menu == "Sair":
+    st.session_state.clear()
+    st.rerun()
